@@ -9,17 +9,21 @@
 
 include( 'forkTemplate.php' );
 
-$f = new forkTemplate( dirname( __FILE__ ) . "/tags" , "php" );
-$f->target( "body" )->snippet( 'exsample' )->val("hello template! this is in [exsample] tag. {@me}")
-->target( "me" )->val( "[this is chain target]" )->set();
+$f = new forkTemplate( dirname( __FILE__ ) . "/snippet" , "php" );
 
-$f->target("another")->tag('div' , array('color'=>'red', 'font-size'=>20) , array('name'=>'ippei'))->val( "[this is another target]")->set();
-$f->target("anotherimage")->tag('img/' , array() , array('src'=>'http://www.croisforce.com/ips-wp/wp-content/themes/first-theme/logo/logo.gif'))->val()->set();
+$f->setSessionValue( 'get' , array('name'=>'john') );
 
-$f->target("body")->val( "[additional to body]" )->set();
+$f->target( "body" )->snippet( 'sample' )->val("--> inner snippet(sample.php). {@me} <br />this is output from sample, session value--> ")
+->target( "me" )->val( "{{nest}}" )->set();
 
-$f->setConstant( "con" , "[this is constant value]" );
+$f->target("another")
+->tag('div' , array('color'=>'red', 'font-size'=>20) , array('name'=>'ippei'))->val( "another one by tag method")->set();
 
-echo $f->render( "{@body} <br />{@!con} <br />{@another}<br />{@anotherimage}");
+$f->target("image")->tag('img/' , array() , array('src'=>'http://www.croisforce.com/ips-wp/wp-content/themes/first-theme/logo/logo.gif'))->val()->set();
 
+$f->target("body")->val( "if point same target , it will be added." )->set();
 
+$f->setConstant( "con" , "{{can use constant value}}" );
+
+echo "<span>hi there. this is forktemplate demo</span>";
+echo $f->render( "{@body} <br />{@!con} <br />{@another}<br />{@image}");

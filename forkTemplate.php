@@ -5,7 +5,7 @@
  *
  * @Author : Ippei Sato
  * @License : MIT License
- * @Version : 0.1
+ * @Version : 0.5
  */
 
 class forkTemplate
@@ -19,7 +19,8 @@ class forkTemplate
     private $end_tag = "}";
     private $constants;
     private $tmp = null;
-    public function __construct( $dir , $e = "tag" )
+    private $session;
+    public function __construct( $dir , $e = "php" )
     {
         $this->dir = $dir;
         if( $this->dir[ strlen( $this->dir ) - 1 ] !== '/' ){
@@ -27,12 +28,19 @@ class forkTemplate
         }
         $this->e = "." . $e;
         $this->constant = new stdClass;
+        $this->session = new stdClass;
     }
     public function setConstant( $name , $value ){
         $this->constants->{$name} = $value;
     }
+    public function setSessionValue( $name , $value ){
+        $this->session->{$name} = $value;
+    }
     public function target( $name )
     {
+        if( isset( $this->target ) ){
+            $this->val("");
+        }
         $this->target = $name;
         return $this;
     }
@@ -56,6 +64,7 @@ class forkTemplate
         }else{
             $this->tmp = $this->exec( $val );            
         }
+
         if( !isset( $this->init_target ) ){
             $this->init_target = $this->target;
         }
@@ -65,8 +74,11 @@ class forkTemplate
 
         return $this;
     }
-    public function set() // 
+    public function set()
     {
+        if( isset( $this->snippet ) ){
+            $this->val("");
+        }
         if( isset( $this->data[$this->init_target] ) ){
             $this->data[$this->init_target] .= $this->tmp;
         }else{
@@ -75,17 +87,16 @@ class forkTemplate
         $this->tmp = null;
         $this->target = null;
         $this->init_target = null;
+        return $this;
     }
 
     public function render( $contents )
     {
-        // datas
         if( !empty( $this->data ) ){
             foreach( $this->data as $k => $v ){
                 $contents = $this->replaceTarget($contents , $k , $v);
             }
         }
-
         // constants
         if( !empty( $this->constants ) ){
             foreach( $this->constants as $k => $v ){
@@ -120,6 +131,7 @@ class forkTemplate
     {
         if( isset( $this->snippet ) ){
             $snippet = $this->snippet;
+            $session = $this->session;
             if( ( $file_name = $this->existSnippetFile( $snippet ) ) !== false ){ 
                 ob_start();
                 include( $file_name );
